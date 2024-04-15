@@ -160,7 +160,7 @@ const authController={
 
             if(!match)
             {
-                console.log("Hello");
+                
                 const error={
                     status:401,
                     message:'Invalid password'

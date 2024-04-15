@@ -12,7 +12,7 @@ const commentController={
             author:Joi.string().regex(mongodbIdPattern).required(),
             blog:Joi.string().regex(mongodbIdPattern).required(),
         });
-
+        console.log("backend:");
         //validate
 
         const {error}=createCommentSchema.validate(req.body);
@@ -23,7 +23,8 @@ const commentController={
 
         //destructre
         const {content,author,blog}=req.body;
-
+        console.log(content);
+        
         try {
             const newComment=new Comment({
                 content,author,blog
@@ -62,10 +63,10 @@ const commentController={
             const obj=new CommentDTO(comments[i]);
             commentsdto.push(obj);
         }
-
+        
         return res.status(200).json({data:commentsdto});
     },
-
+    
 
 }
 

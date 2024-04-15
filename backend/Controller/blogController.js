@@ -100,7 +100,7 @@ async getAll(req,res,next){
 },
 async getById(req,res,next){
     
-    //1.validate id
+    //1.validate ids
     //2.send response
 
     const getByIdSchema=Joi.object({
@@ -110,7 +110,7 @@ async getById(req,res,next){
 
     //the data is being sent into the parameters of the request, not the body of req
     const {error}=getByIdSchema.validate(req.params);
-
+    
     if(error){
         return next(error);
     }
@@ -133,8 +133,11 @@ async getById(req,res,next){
         return next(error);
     }
 
+    const authorUsername = blog1.author.username;
+
     const blogDto=new BlogsDetailsDto(blog1);
     blogDto.photoPath=blog1.photoPath;
+    blogDto.authorusername=blog1.author.username;
     return res.status(200).json({blog:blogDto});
 
 
@@ -154,8 +157,9 @@ async update(req,res,next){
 
     //detructre from req body
 
-    const {title,content,author,blogId,photo}= req.body;
-
+    const {title,content,author,blogid,photoPath}= req.body;
+    console.log("new values: ",blogid);
+    console.log(content);
     //delete previous photo
     //save new photo
 
@@ -177,12 +181,12 @@ async update(req,res,next){
     let blogfind;
 
     try {
-        blogfind=await blog.findOne({_id:blogId});
+        blogfind=await blog.findOne({_id:blogid});
     } catch (error) {
         return next(error);
     }
 
-    if(photo){
+    if(photoPath){
         let previousPhoto=blogfind.photoPath;
         previousPhoto=previousPhoto.split('/').pop(-1);//image.png
 
@@ -190,7 +194,7 @@ async update(req,res,next){
         fs.unlinkSync(`storage/${previousPhoto}`);
 
         // Convert the base64-encoded image string to a buffer
-        const buffer = Buffer.from(photo.replace(/^data:image\/(png|jpg|jpeg);base64,/,''), 'base64');
+        const buffer = Buffer.from(photoPath.replace(/^data:image\/(png|jpg|jpeg);base64,/,''), 'base64');
   
 
         //allocate name
@@ -203,7 +207,7 @@ async update(req,res,next){
         return next(error);
         }
         await blog.findOneAndUpdate(
-            { _id: blogId },
+            { _id: blogid },
             { $set: { title, content, photoPath: `${BACKEND_SERVER_PATH}/storage/${imagePath}` } },
             { new: true }
           );
@@ -211,20 +215,35 @@ async update(req,res,next){
     }
     else{
         await blog.findOneAndUpdate(
-            { _id: blogId },
+            { _id: blogid },
             { $set: { title, content } },
             { new: true }
         );
-        console.log(title);
-        console.log(content);
-
+      
+        try {
+            const updatedBlog = await blog.findOneAndUpdate(
+                { _id: blogid },
+                { $set: { title, content, photoPath: `${BACKEND_SERVER_PATH}/storage/${imagePath}` } },
+                { new: true }
+            );
+            console.log(updatedBlog);
+            if (!updatedBlog) {
+                return res.status(404).json({ message: 'Blog post not found' });
+            }
+        
+            return res.status(200).json({ message: 'blog updated!' });
+        } catch (error) {
+            console.error('Error updating blog:', error);
+            return next(error);
+        }
+        
         // b1=await blog.find({_id:blogId});
         
         // let c=b1.title;
         // console.log(c);
 
     }
-
+    
     return res.status(200).json({message:'blog updated!'});
 },
 async delete(req,res,next){

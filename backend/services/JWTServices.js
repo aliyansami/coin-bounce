@@ -2,6 +2,7 @@ const jwt=require('jsonwebtoken');
 const {ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET}=require('../config/index');
 const {refreshToken}=require('../models/token');
 
+
 class JWTServices{
     //better to keep secret keys of both accessand refresh token, different
 

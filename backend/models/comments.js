@@ -4,7 +4,7 @@ const{Schema}=mongoose;
 
 const commentSchema=new Schema(
 {
-content:{type:String,require:true},
+content:{type:String,required:true},
 blog:{type:mongoose.Schema.Types.ObjectId, ref:'Blog'},
 author:{type:mongoose.Schema.Types.ObjectId, ref:'User'},
 },
